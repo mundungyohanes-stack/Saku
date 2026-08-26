@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "Saku — Buku Keuangan Digital",
+  "short_name": "Saku",
+  "description": "Catat pemasukan dan pengeluaran harian dengan mode kasir cepat, target tabungan, dan laporan bulanan.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0F1830",
+  "theme_color": "#16213E",
+  "lang": "id",
+  "dir": "ltr",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
