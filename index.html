@@ -60,7 +60,7 @@
   .brand{font-family:var(--serif); font-weight:600; font-size:20px; letter-spacing:.04em;}
   .brand-sub{font-family:var(--mono); font-size:11px; color:#9AA6C4; margin-top:2px;}
   .header-greet{min-width:0;}
-  .header-greet-name{font-family:var(--serif); font-weight:700; font-size:16.5px; letter-spacing:.02em; line-height:1.25; color:#F1ECDD; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .header-greet-name{font-family:var(--serif); font-weight:700; font-size:16.5px; letter-spacing:.02em; line-height:1.25; color:#F1ECDD; white-space:normal; overflow:visible; text-overflow:clip; word-break:break-word;}
   .header-greet-time{font-family:var(--mono); font-weight:600; font-size:11px; letter-spacing:.08em; color:var(--gold-2); text-transform:uppercase; margin-top:3px;}
   .header-greet-sub{font-family:var(--mono); font-size:9.5px; letter-spacing:.03em; color:#9AA6C4; margin-top:5px; text-transform:uppercase; line-height:1.35; max-width:180px;}
   .gear-btn{width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15);
@@ -657,14 +657,14 @@
       </div>
       <div class="target-card" id="incomeBreakdownSection" style="display:none; margin:14px 20px 0; cursor:default;">
         <div class="target-top">
-          <span class="target-top-label">Rincian Pendapatan</span>
+          <span class="target-top-label">Rincian Pendapatan Hari Ini</span>
         </div>
         <div class="breakdown-list" id="incomeBreakdownList" style="margin-top:10px;"></div>
       </div>
 
       <div class="target-card" id="breakdownSection" style="display:none; margin:14px 20px 0; cursor:default;">
         <div class="target-top">
-          <span class="target-top-label">Rincian Pengeluaran</span>
+          <span class="target-top-label">Rincian Pengeluaran Hari Ini</span>
         </div>
         <div class="breakdown-list" id="breakdownList" style="margin-top:10px;"></div>
       </div>
@@ -1525,7 +1525,7 @@ const DEFAULT_WALLETS = [
 let wallets = [];
 
 // nama pengguna yang tampil di sapaan header ("HALO [NAMA]"), diatur lewat Pengaturan > Umum
-let userName = "";
+let userName = "Ane";
 
 // logo kustom (data URL) yang diunggah user: logo aplikasi, logo per kategori, logo per dompet
 let appLogo = null;
@@ -1802,7 +1802,7 @@ async function loadData(){
   }catch(e){ /* belum ada riwayat pindah saldo tersimpan */ }
   try{
     const savedUserName = await idbGet("userName");
-    if(typeof savedUserName === "string"){ userName = savedUserName; }
+    if(typeof savedUserName === "string"){ userName = String(savedUserName).trim().replace(/\.+$/g, "").trim().slice(0,20); }
   }catch(e){ /* belum ada nama pengguna tersimpan */ }
   try{
     const savedAppLogo = await idbGet("appLogo");
@@ -1841,9 +1841,12 @@ async function loadData(){
 }
 
 async function persistUserName(value){
-  userName = value;
-  try{ await idbSet("userName", value); }catch(e){ /* abaikan */ }
+  const clean = String(value||"").trim().replace(/\.+$/g, "").trim().slice(0,20);
+  userName = clean;
+  try{ await idbSet("userName", clean); }catch(e){ /* abaikan */ }
   updateHeaderGreeting();
+  const inputEl = el("userNameInput");
+  if(inputEl && inputEl.value !== clean) inputEl.value = clean;
 }
 
 async function persistTransactions(next){
@@ -3383,8 +3386,8 @@ function render(){
     renderSavingsDetail();
   }
   renderChart(refDate);
-  renderBreakdown("incomeBreakdownList", "incomeBreakdownSection", buildBreakdown(monthTx, "masuk"));
-  renderBreakdown("breakdownList", "breakdownSection", buildBreakdown(monthTx, "keluar"));
+  renderBreakdown("incomeBreakdownList", "incomeBreakdownSection", buildBreakdown(todayTx, "masuk"));
+  renderBreakdown("breakdownList", "breakdownSection", buildBreakdown(todayTx, "keluar"));
   // card perbandingan A+B
   if(typeof renderCompareCard === "function") renderCompareCard();
   if(el("compareDetailBackdrop") && el("compareDetailBackdrop").classList.contains("open") && typeof renderCompareDetail === "function") renderCompareDetail();
@@ -5394,7 +5397,9 @@ function updateHeaderGreeting(){
   const nameEl = el("headerGreetName");
   const timeEl = el("headerGreetTime");
   if(nameEl){
-    const displayName = (userName || "").trim();
+    let displayName = (userName || "").trim().replace(/\.+$/g, "").trim();
+    // hilangkan titik-titik sisa dari ellipsis atau input, biar tidak jadi "HALO ANE....."
+    if(displayName.length > 20) displayName = displayName.slice(0,20).trim();
     nameEl.textContent = displayName ? `HALO ${displayName.toUpperCase()}` : "HALO";
   }
   if(timeEl){
