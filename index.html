@@ -3236,13 +3236,13 @@ function renderDailyTarget(todayTx){
   const current = entry.mode === "bersih" ? Math.max(income - expense, 0) : income;
   const pct = Math.max(0, Math.min(100, (current/entry.amount)*100));
   const over = current >= entry.amount;
-  const remainPct = Math.max(0, 100 - Math.round(pct));
+  const remainRp = Math.max(entry.amount - current, 0);
   if(badge) badge.textContent = entry.mode === "bersih" ? "BERSIH" : "PEMASUKAN";
   body.innerHTML = `
     <div class="target-track"><div class="target-fill${over?" over":""}" style="width:${pct}%;"></div></div>
     <div class="target-bottom">
       <span>${formatRupiah(current)} / ${formatRupiah(entry.amount)}</span>
-      <span>${over ? "Target tercapai 🎉" : Math.round(pct) + "% • kurang " + remainPct + "%"}</span>
+      <span>${over ? "Target tercapai 🎉" : Math.round(pct) + "% / " + formatRupiah(remainRp)}</span>
     </div>`;
 }
 

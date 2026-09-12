@@ -1,4 +1,4 @@
-const CACHE_NAME = "saku-cache-v30";
+const CACHE_NAME = "saku-cache-v32";
 const APP_SHELL = [
   "./",
   "./index.html",
