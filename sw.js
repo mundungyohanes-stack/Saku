@@ -1,4 +1,4 @@
-const CACHE_NAME = "saku-cache-v20";
+const CACHE_NAME = "saku-cache-v30";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -26,6 +26,23 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  // Navigasi halaman: network-first, fallback ke index.html cache (full offline, tanpa file tambahan)
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(async () => {
+          const cachedPage = await caches.match("./index.html");
+          return cachedPage || caches.match("./");
+        })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {

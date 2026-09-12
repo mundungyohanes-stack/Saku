@@ -59,10 +59,6 @@
     box-shadow:0 20px 60px -20px rgba(0,0,0,.7); border:3px solid rgba(241,236,221,.18);}
   .brand{font-family:var(--serif); font-weight:600; font-size:20px; letter-spacing:.04em;}
   .brand-sub{font-family:var(--mono); font-size:11px; color:#9AA6C4; margin-top:2px;}
-  .header-greet{min-width:0;}
-  .header-greet-name{font-family:var(--serif); font-weight:700; font-size:16.5px; letter-spacing:.02em; line-height:1.25; color:#F1ECDD; white-space:normal; overflow:visible; text-overflow:clip; word-break:break-word;}
-  .header-greet-time{font-family:var(--mono); font-weight:600; font-size:11px; letter-spacing:.08em; color:var(--gold-2); text-transform:uppercase; margin-top:3px;}
-  .header-greet-sub{font-family:var(--mono); font-size:9.5px; letter-spacing:.03em; color:#9AA6C4; margin-top:5px; text-transform:uppercase; line-height:1.35; max-width:180px;}
   .gear-btn{width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15);
     color:var(--gold-2); font-size:16px; cursor:pointer; flex-shrink:0;}
   .header-datetime{text-align:right; flex-shrink:0;}
@@ -591,11 +587,6 @@
             <span id="appLogoContent">S</span>
             <input type="file" accept="image/*" id="appLogoInput" style="display:none;">
           </label>
-          <div class="header-greet">
-            <div class="header-greet-name" id="headerGreetName">HALO —</div>
-            <div class="header-greet-time" id="headerGreetTime">SELAMAT —</div>
-            <div class="header-greet-sub">Selamat Datang di Buku Keuangan Digital</div>
-          </div>
         </div>
         <div class="header-datetime">
           <div class="header-datetime-date" id="headerDateText">—</div>
@@ -629,7 +620,7 @@
 
     <div class="perforation"></div>
 
-    <div class="paper">
+      <div class="paper">
       <div class="paper">
       <div class="today-bar">
         <div class="today-bar-header">
@@ -652,8 +643,19 @@
             <div class="today-card-val" id="todayExpenseVal">Rp0</div>
           </div>
         </div>
-        <div class="section-title" style="margin:14px 0 6px;">Saldo per Dompet Yang Didapat Hari Ini</div>
-        <div id="todayWalletBody"></div>
+      </div>
+      <div class="target-card tap-card" id="dailyTargetCard" style="margin:12px 20px 0;">
+        <div class="target-top">
+          <span class="target-top-label">🎯 Target Hari Ini</span>
+          <span id="dailyTargetModeBadge" style="font-family:var(--mono); font-size:10px; color:var(--muted);"></span>
+        </div>
+        <div id="dailyTargetBody"></div>
+      </div>
+      <div class="target-card" id="todayWalletCard" style="margin:14px 20px 0; cursor:default;">
+        <div class="target-top">
+          <span class="target-top-label">Saldo per Dompet Hari Ini</span>
+        </div>
+        <div id="todayWalletBody" style="margin-top:10px;"></div>
       </div>
       <div class="target-card" id="incomeBreakdownSection" style="display:none; margin:14px 20px 0; cursor:default;">
         <div class="target-top">
@@ -899,6 +901,17 @@
 
         <div class="stats-summary-row">
           <div class="stats-summary-card">
+            <div class="stats-summary-label">Total Pemasukan</div>
+            <div class="stats-summary-value" id="statsTotalIncome" style="color:var(--green);">Rp0</div>
+          </div>
+          <div class="stats-summary-card">
+            <div class="stats-summary-label">Total Pengeluaran</div>
+            <div class="stats-summary-value" id="statsTotalExpense" style="color:var(--red);">Rp0</div>
+          </div>
+        </div>
+
+        <div class="stats-summary-row">
+          <div class="stats-summary-card">
             <div class="stats-summary-label">Orderan</div>
             <div class="stats-summary-value" id="statsOrderCount">0x</div>
           </div>
@@ -1133,6 +1146,33 @@
           <input class="amount-input" id="targetInput" inputmode="numeric" placeholder="0" />
         </div>
         <button class="save-btn" id="saveTargetBtn">Simpan Target</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- sheet edit Target Harian, dibuka dari tap kartu Target Hari Ini -->
+    <div class="sheet-backdrop" id="dailyTargetEditBackdrop">
+      <div class="sheet stats-sheet" id="dailyTargetEditSheet">
+        <div class="stats-head">
+          <div class="sheet-title" style="margin-bottom:0;">Target Hari Ini</div>
+          <button type="button" class="cashier-close-btn" id="closeDailyTargetEditBtn" aria-label="Tutup">✕</button>
+        </div>
+
+        <div class="field-label" id="dailyTargetDateLabel">—</div>
+        <div class="field-label" style="margin-top:14px;">Diukur Dari</div>
+        <div class="chart-toggle" id="dailyTargetModeToggle">
+          <button type="button" data-mode="masuk" class="active">Pemasukan</button>
+          <button type="button" data-mode="bersih">Bersih</button>
+        </div>
+        <div class="settings-hint">Pemasukan = total uang masuk hari ini. Bersih = pemasukan − pengeluaran hari ini.</div>
+
+        <div class="field-label" style="margin-top:14px;">Target Nominal Hari Ini</div>
+        <div class="amount-row">
+          <span class="amount-prefix">Rp</span>
+          <input class="amount-input" id="dailyTargetInput" inputmode="numeric" placeholder="0" />
+        </div>
+        <button class="save-btn" id="saveDailyTargetBtn">Simpan Target Hari Ini</button>
+        <button class="cancel-btn" id="clearDailyTargetBtn" style="color:var(--red);">Hapus target hari ini</button>
       </div>
     </div>
 
@@ -1301,12 +1341,6 @@
         </div>
 
         <div id="settingsTabUmum">
-          <div class="field-label">Nama Pengguna</div>
-          <input class="text-input" id="userNameInput" placeholder="cth. Anes" maxlength="30" />
-          <div class="settings-hint" style="margin-top:6px;">Tampil di sapaan header beranda, mis. "HALO ANES".</div>
-
-          <hr class="settings-divider" />
-
           <div class="field-label">Logo Aplikasi</div>
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;" id="appLogoSettingsRow"></div>
           <label class="file-label" id="appLogoSettingsLabel">
@@ -1371,6 +1405,11 @@
             <input type="file" id="importInput" accept="application/json" style="display:none;" />
           </label>
           <div class="settings-hint">Transaksi dari file cadangan akan digabung dengan data yang sudah ada (tanpa duplikat).</div>
+
+          <div class="field-label">Backup Otomatis</div>
+          <div class="settings-hint">Setiap dibuka (maksimal 1x seminggu) aplikasi menyimpan salinan otomatis di perangkat ini. Simpan juga ke file Download seminggu sekali biar aman kalau ganti HP.</div>
+          <div id="autoBackupList"></div>
+          <button class="settings-row-btn" id="saveAutoBackupFileBtn">💾 Simpan Backup Terbaru ke File</button>
         </div>
 
         <div id="settingsTabIncome" style="display:none;">
@@ -1524,9 +1563,6 @@ const DEFAULT_WALLETS = [
 ];
 let wallets = [];
 
-// nama pengguna yang tampil di sapaan header ("HALO [NAMA]"), diatur lewat Pengaturan > Umum
-let userName = "Ane";
-
 // logo kustom (data URL) yang diunggah user: logo aplikasi, logo per kategori, logo per dompet
 let appLogo = null;
 let categoryLogos = {};
@@ -1622,6 +1658,7 @@ function isoDate(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStar
 
 let transactions = [];
 let savingsTarget = 0;
+let dailyTargets = {}; // target harian: {"2026-09-12": {amount, mode:"masuk"|"bersih"}}
 let savingsPots = [];   // pos tabungan: {id, name, target, createdAt}
 let savingsTx = [];     // riwayat setor/tarik: {id, potId, type:"setor"|"tarik", amount, wallet, date, note, createdAt}
 let currentPotId = null;      // pos yang sedang dibuka di sheet detail
@@ -1632,10 +1669,135 @@ let walletTransfers = []; // riwayat pindah saldo antar dompet: {id, fromWallet,
 let transferFromWallet = "tunai";
 let transferToWallet = "tunai";
 
-let historyMode = "bulan";  // filter Riwayat Transaksi: hari | minggu | bulan | tahun
-let historyOffset = 0;      // pergeseran periode riwayat relatif ke hari ini
+// ===== schema backup JSON berversi (anti data korup saat import) =====
+const BACKUP_APP = "saku";
+const BACKUP_SCHEMA_VERSION = 1;
+function isValidDateKey(s){
+  if(typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(s + "T00:00:00");
+  return !isNaN(d.getTime()) && isoDate(d) === s;
+}
+function sanitizeTx(t){
+  if(!t || typeof t !== "object") return null;
+  const id = String(t.id || "").slice(0, 64);
+  const amount = Number(t.amount);
+  const type = t.type;
+  const date = t.date;
+  if(!id || !isFinite(amount) || amount <= 0) return null;
+  if(type !== "masuk" && type !== "keluar") return null;
+  if(!isValidDateKey(date)) return null;
+  return {
+    id,
+    type,
+    amount: Math.round(amount),
+    date,
+    category: String(t.category || "").slice(0, 64),
+    wallet: String(t.wallet || "tunai").slice(0, 64),
+    note: String(t.note || "").slice(0, 200),
+    createdAt: Number(t.createdAt) || 0
+  };
+}
+function sanitizeWallet(w){
+  if(!w || typeof w !== "object") return null;
+  const id = String(w.id || "").slice(0, 64);
+  if(!id) return null;
+  return { id, label: String(w.label || id).slice(0, 40) };
+}
+// simpan snapshot sebelum import digabung (bisa dipulihkan manual dari IndexedDB)
+function snapshotBeforeImport(){
+  try{
+    idbSet("backup-before-import", { at: new Date().toISOString(), transactions });
+  }catch(e){ /* abaikan */ }
+}
+
+// ===== backup otomatis mingguan (lapis IndexedDB silent + file via 1 klik) =====
+const AUTO_BACKUP_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
+const AUTO_BACKUP_MAX = 4;
+function buildBackupPayload(){
+  return { app: BACKUP_APP, schemaVersion: BACKUP_SCHEMA_VERSION, exportedAt: new Date().toISOString(), data: { transactions, savingsTarget, dailyTargets, customIncomeCategories, customExpenseCategories, categoryOverrides, wallets, savingsPots, savingsTx, walletTransfers, appLogo, categoryLogos, walletLogos, targetLogo, potLogos } };
+}
+function backupSummary(list){
+  const tx = Array.isArray(list) ? list : [];
+  return {
+    count: tx.length,
+    income: tx.filter(t=>t && t.type==="masuk").reduce((s,t)=>s+(Number(t.amount)||0),0),
+    expense: tx.filter(t=>t && t.type==="keluar").reduce((s,t)=>s+(Number(t.amount)||0),0)
+  };
+}
+// dipanggil sekali tiap aplikasi dibuka (fire-and-forget), maksimal 1 backup per 7 hari
+async function maybeAutoBackup(){
+  try{
+    if(!Array.isArray(transactions) || transactions.length === 0) return;
+    const lastAt = await idbGet("lastAutoBackupAt");
+    if(lastAt && (Date.now() - new Date(lastAt).getTime()) < AUTO_BACKUP_INTERVAL_MS) return;
+    const payload = buildBackupPayload();
+    const prev = (await idbGet("autoBackups")) || [];
+    const list = Array.isArray(prev) ? prev.slice() : [];
+    list.push({ at: payload.exportedAt, summary: backupSummary(transactions), payload });
+    while(list.length > AUTO_BACKUP_MAX) list.shift();
+    await idbSet("autoBackups", list);
+    await idbSet("lastAutoBackupAt", payload.exportedAt);
+    renderAutoBackupList();
+    showToast("Backup otomatis tersimpan — simpan ke file dari Pengaturan");
+  }catch(e){ /* backup otomatis tidak boleh mengganggu aplikasi */ }
+}
+async function renderAutoBackupList(){
+  const box = el("autoBackupList");
+  if(!box) return;
+  let list = [];
+  try{ list = (await idbGet("autoBackups")) || []; }catch(e){ list = []; }
+  if(!Array.isArray(list) || list.length === 0){
+    box.innerHTML = `<div class="empty-mini">Belum ada backup otomatis.</div>`;
+    return;
+  }
+  const ordered = list.slice().reverse();
+  box.innerHTML = ordered.map((b, i)=>{
+    const idx = list.length - 1 - i;
+    const d = new Date(b.at);
+    const label = isNaN(d.getTime()) ? String(b.at||"—") : d.toLocaleDateString("id-ID", { day:"numeric", month:"short", year:"numeric" });
+    const s = b.summary || {};
+    return `<div class="savings-history-row">
+      <div><div style="font-weight:600;">${label}</div>
+      <div style="font-size:11px; color:var(--muted);">${s.count||0} transaksi</div></div>
+      <div style="display:flex; gap:6px;">
+        <button class="today-btn" data-autobackup-dl="${idx}">Unduh</button>
+        <button class="today-btn" data-autobackup-restore="${idx}">Pulihkan</button>
+      </div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-autobackup-dl]").forEach(btn=>{
+    btn.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const item = list[Number(btn.getAttribute("data-autobackup-dl"))];
+      if(!item) return;
+      downloadBlob(JSON.stringify(item.payload, null, 2), "application/json", `saku-auto-backup-${String(item.at||"").slice(0,10)}.json`);
+      showToast("Backup diunduh ke Download");
+    });
+  });
+  box.querySelectorAll("[data-autobackup-restore]").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      const idx = Number(btn.getAttribute("data-autobackup-restore"));
+      confirmDelete("Pulihkan backup ini? Kondisi sekarang otomatis disimpan dulu sebagai snapshot.", async ()=>{
+        const all = (await idbGet("autoBackups")) || [];
+        const item = all[idx];
+        if(!item || !item.payload || !item.payload.data) { showToast("Backup tidak valid"); return; }
+        try{ await idbSet("backup-before-restore", { at: new Date().toISOString(), transactions }); }catch(err){ /* abaikan */ }
+        const clean = (item.payload.data.transactions || []).map(sanitizeTx).filter(Boolean);
+        await persistTransactions(clean);
+        showToast("Backup dipulihkan");
+        renderAutoBackupList();
+      });
+    });
+  });
+}
+
+// Riwayat di beranda selalu hari ini (lihat getHistoryTx). Variabel periode lama sengaja dihapus.
 let expandedId = null;
 let walletShowZero = false;
+// daftar dompet hari ini dibatasi max 2 baris biar kartu Target Hari Ini tetap kelihatan tanpa scroll
+let todayWalletExpanded = false;
+const TODAY_WALLET_MAX_ROWS = 2;
 let savingsShowZero = false;
 let editTxId = null;
 let editTxType = "keluar";
@@ -1759,7 +1921,13 @@ async function idbSet(key, value){
 async function loadData(){
   try{
     const savedTx = await idbGet("transactions");
-    if(savedTx){ transactions = savedTx; }
+    if(Array.isArray(savedTx)){
+      const clean = savedTx.map(sanitizeTx).filter(Boolean);
+      transactions = clean;
+      if(clean.length !== savedTx.length){
+        try{ await idbSet("transactions", clean); }catch(e){ /* abaikan */ }
+      }
+    }
   }catch(e){ /* belum ada data tersimpan */ }
   try{
     const savedTarget = await idbGet("savingsTarget");
@@ -1801,10 +1969,6 @@ async function loadData(){
     if(Array.isArray(savedWalletTransfers)){ walletTransfers = savedWalletTransfers; }
   }catch(e){ /* belum ada riwayat pindah saldo tersimpan */ }
   try{
-    const savedUserName = await idbGet("userName");
-    if(typeof savedUserName === "string"){ userName = String(savedUserName).trim().replace(/\.+$/g, "").trim().slice(0,20); }
-  }catch(e){ /* belum ada nama pengguna tersimpan */ }
-  try{
     const savedAppLogo = await idbGet("appLogo");
     if(savedAppLogo){ appLogo = savedAppLogo; }
   }catch(e){ /* belum ada logo aplikasi tersimpan */ }
@@ -1824,6 +1988,19 @@ async function loadData(){
     const savedPotLogos = await idbGet("potLogos");
     if(savedPotLogos && typeof savedPotLogos === "object"){ potLogos = savedPotLogos; }
   }catch(e){ /* belum ada logo pos tabungan tersimpan */ }
+  try{
+    const savedDailyTargets = await idbGet("dailyTargets");
+    if(savedDailyTargets && typeof savedDailyTargets === "object" && !Array.isArray(savedDailyTargets)){
+      const clean = {};
+      Object.entries(savedDailyTargets).forEach(([k, v])=>{
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+        const amount = (v && typeof v === "object") ? Number(v.amount) : Number(v);
+        if(!isFinite(amount) || amount <= 0) return;
+        clean[k] = { amount: Math.round(amount), mode: (v && v.mode === "bersih") ? "bersih" : "masuk" };
+      });
+      dailyTargets = clean;
+    }
+  }catch(e){ /* belum ada target harian tersimpan */ }
   let savedFontId = "default";
   try{
     const savedFont = await idbGet("appFont");
@@ -1832,21 +2009,11 @@ async function loadData(){
   applyFont(savedFontId);
   const fontSelectEl = el("appFontSelect");
   if(fontSelectEl){ fontSelectEl.value = savedFontId; }
-  const userNameInputEl = el("userNameInput");
-  if(userNameInputEl){ userNameInputEl.value = userName; }
-  updateHeaderGreeting();
   loaded = true;
   renderAppLogo();
   render();
-}
-
-async function persistUserName(value){
-  const clean = String(value||"").trim().replace(/\.+$/g, "").trim().slice(0,20);
-  userName = clean;
-  try{ await idbSet("userName", clean); }catch(e){ /* abaikan */ }
-  updateHeaderGreeting();
-  const inputEl = el("userNameInput");
-  if(inputEl && inputEl.value !== clean) inputEl.value = clean;
+  renderAutoBackupList();
+  maybeAutoBackup();
 }
 
 async function persistTransactions(next){
@@ -1999,9 +2166,6 @@ el("appFontSelect").addEventListener("change", (e)=>{
   applyFont(fontId);
   persistAppFont(fontId);
   showToast("Font aplikasi diperbarui");
-});
-el("userNameInput").addEventListener("input", (e)=>{
-  persistUserName(e.target.value);
 });
 
 el("appLogoSettingsInput").addEventListener("change", (e)=>{
@@ -2162,31 +2326,7 @@ function getMonthTx(refDate){
     .sort((a,b) => a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt - a.createdAt);
 }
 
-// ===== filter Riwayat Transaksi: harian / mingguan / bulanan / tahunan =====
-function getHistoryPeriod(){
-  const now = new Date(); now.setHours(0,0,0,0);
-  if(historyMode === "hari"){
-    const d = new Date(now); d.setDate(d.getDate() + historyOffset);
-    return { start: d, end: d };
-  }
-  if(historyMode === "minggu"){
-    const d = new Date(now); d.setDate(d.getDate() + historyOffset*7);
-    const day = d.getDay(); // 0=Minggu..6=Sabtu
-    const diffToMonday = (day===0 ? -6 : 1-day);
-    const start = new Date(d); start.setDate(d.getDate() + diffToMonday);
-    const end = new Date(start); end.setDate(start.getDate() + 6);
-    return { start, end };
-  }
-  if(historyMode === "tahun"){
-    const y = now.getFullYear() + historyOffset;
-    return { start: new Date(y,0,1), end: new Date(y,11,31) };
-  }
-  // bulan (default)
-  const d = new Date(now); d.setDate(1); d.setMonth(d.getMonth() + historyOffset);
-  const start = new Date(d);
-  const end = new Date(d.getFullYear(), d.getMonth()+1, 0);
-  return { start, end };
-}
+// (getHistoryPeriod dihapus: tidak pernah dipakai — riwayat beranda selalu hari ini)
 
 function historyLabel(){
   const d = new Date();
@@ -2625,6 +2765,8 @@ function renderStatsDetail(){
   el("statsNetValue").textContent = (net<0?"-":"") + formatRupiah(net);
   el("statsIncomeValue").textContent = formatRupiah(income);
   el("statsExpenseValue").textContent = formatRupiah(expense);
+  el("statsTotalIncome").textContent = formatRupiah(income);
+  el("statsTotalExpense").textContent = formatRupiah(expense);
 
   // perbandingan vs periode sebelumnya — berlaku untuk semua mode (hari/minggu/bulan/tahun)
   const prevRange = getStatsPrevRange();
@@ -3052,6 +3194,58 @@ function renderTarget(monthTx){
     </div>`;
 }
 
+// ===== target harian (nominal diinput tiap hari, toggle Pemasukan/Bersih) =====
+function getDailyTargetEntry(dateKey){
+  const e = dailyTargets ? dailyTargets[dateKey] : null;
+  if(typeof e === "number") return { amount: e, mode: "masuk" }; // kompatibel format lama
+  if(e && typeof e === "object" && isFinite(Number(e.amount)) && Number(e.amount) > 0){
+    return { amount: Math.round(Number(e.amount)), mode: e.mode === "bersih" ? "bersih" : "masuk" };
+  }
+  return null;
+}
+function getLastDailyTargetMode(){
+  const keys = dailyTargets ? Object.keys(dailyTargets).sort() : [];
+  for(let i = keys.length - 1; i >= 0; i--){
+    const e = getDailyTargetEntry(keys[i]);
+    if(e) return e.mode;
+  }
+  return "masuk";
+}
+async function persistDailyTargets(){
+  try{
+    // pangkas entri > 90 hari biar tidak menggelembung
+    const cutoff = new Date(); cutoff.setHours(0,0,0,0); cutoff.setDate(cutoff.getDate() - 90);
+    const cutoffKey = isoDate(cutoff);
+    Object.keys(dailyTargets).forEach(k => { if(k < cutoffKey) delete dailyTargets[k]; });
+    await idbSet("dailyTargets", dailyTargets);
+  }catch(e){ /* abaikan */ }
+}
+function renderDailyTarget(todayTx){
+  const body = el("dailyTargetBody");
+  const badge = el("dailyTargetModeBadge");
+  if(!body) return;
+  const todayKey = todayStr();
+  const entry = getDailyTargetEntry(todayKey);
+  const income = todayTx.filter(t=>t.type==="masuk").reduce((s,t)=>s+t.amount,0);
+  const expense = todayTx.filter(t=>t.type==="keluar").reduce((s,t)=>s+t.amount,0);
+  if(!entry){
+    if(badge) badge.textContent = "";
+    body.innerHTML = `<div class="target-empty">Ketuk untuk mengatur target hari ini.</div>`;
+    return;
+  }
+  const current = entry.mode === "bersih" ? Math.max(income - expense, 0) : income;
+  const pct = Math.max(0, Math.min(100, (current/entry.amount)*100));
+  const over = current >= entry.amount;
+  const remainPct = Math.max(0, 100 - Math.round(pct));
+  if(badge) badge.textContent = entry.mode === "bersih" ? "BERSIH" : "PEMASUKAN";
+  body.innerHTML = `
+    <div class="target-track"><div class="target-fill${over?" over":""}" style="width:${pct}%;"></div></div>
+    <div class="target-bottom">
+      <span>${formatRupiah(current)} / ${formatRupiah(entry.amount)}</span>
+      <span>${over ? "Target tercapai 🎉" : Math.round(pct) + "% • kurang " + remainPct + "%"}</span>
+    </div>`;
+}
+
 function getWalletBalances(){
   const map = {};
   wallets.forEach(w=>{ map[w.id] = 0; });
@@ -3197,11 +3391,20 @@ function renderTodayWalletCard(){
     body.innerHTML = `<div class="empty-mini">Belum ada transaksi hari ini.</div>`;
     return;
   }
-  body.innerHTML = balances.map(x => `
+  const visible = todayWalletExpanded ? balances : balances.slice(0, TODAY_WALLET_MAX_ROWS);
+  const hiddenCount = balances.length - visible.length;
+  body.innerHTML = visible.map(x => `
     <div class="wallet-row">
       <div class="wallet-row-label"><span>${walletIconHTML(x.wallet)}</span><span>${x.wallet.label}</span></div>
       <div class="wallet-row-amount" style="color:${x.balance<0 ? 'var(--red)' : 'var(--green)'};">${x.balance<0?'-':'+'}${formatRupiah(x.balance)}</div>
-    </div>`).join("");
+    </div>`).join("") + (hiddenCount > 0
+      ? `<div class="show-zero-toggle" id="todayWalletExpandBtn">+ ${hiddenCount} dompet lainnya • tampilkan</div>`
+      : (todayWalletExpanded && balances.length > TODAY_WALLET_MAX_ROWS
+        ? `<div class="show-zero-toggle" id="todayWalletExpandBtn">sembunyikan</div>` : ""));
+  const expandBtn = document.getElementById("todayWalletExpandBtn");
+  if(expandBtn){
+    expandBtn.addEventListener("click", (e)=>{ e.stopPropagation(); todayWalletExpanded = !todayWalletExpanded; renderTodayWalletCard(); });
+  }
 }
 
 function renderChart(refDate){
@@ -3375,6 +3578,7 @@ function render(){
   }
 
   renderTarget(monthTx);
+  renderDailyTarget(todayTx);
   renderWalletCard();
   renderTodayWalletCard();
   if(el("walletBalanceBackdrop").classList.contains("open")){
@@ -3493,18 +3697,7 @@ function escapeHtml(str){
 
 // navigasi bulan
 
-// navigasi & toggle periode Riwayat Transaksi (hari/minggu/bulan/tahun)
-document.querySelectorAll("#historyModeToggle button").forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    if(historyMode === btn.getAttribute("data-mode")) return;
-    historyMode = btn.getAttribute("data-mode");
-    historyOffset = 0;
-    document.querySelectorAll("#historyModeToggle button").forEach(b=>b.classList.toggle("active", b===btn));
-    render();
-  });
-});
-el("historyPrev").addEventListener("click", ()=>{ historyOffset--; render(); });
-el("historyNext").addEventListener("click", ()=>{ historyOffset++; render(); });
+// (toggle/prev/next periode riwayat dihapus: UI-nya disembunyikan & riwayat selalu hari ini)
 
 // buka/tutup tab Statistik
 el("closeStatsBtn").addEventListener("click", ()=> requestCloseModal("statsBackdrop"));
@@ -3682,10 +3875,6 @@ el("statsNavNext").addEventListener("click", ()=> statsCalNav(1));
 // lompat ke transaksi hari ini
 el("jumpTodayBtn").addEventListener("click", ()=>{
   const today = todayStr();
-  if(historyOffset !== 0){
-    historyOffset = 0;
-    render();
-  }
   setTimeout(()=>{
     const node = document.getElementById(`date-${today}`);
     if(node){
@@ -4128,6 +4317,52 @@ el("saveTargetBtn").addEventListener("click", ()=>{
   showToast("Target tabungan disimpan");
   requestCloseModal("targetEditBackdrop");
 });
+
+// ===== sheet Target Hari Ini (toggle Pemasukan/Bersih + nominal) =====
+let dailyTargetEditMode = "masuk";
+function syncDailyTargetModeToggle(){
+  document.querySelectorAll("#dailyTargetModeToggle button").forEach(b=>{
+    b.classList.toggle("active", b.getAttribute("data-mode") === dailyTargetEditMode);
+  });
+}
+document.querySelectorAll("#dailyTargetModeToggle button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    dailyTargetEditMode = btn.getAttribute("data-mode");
+    syncDailyTargetModeToggle();
+  });
+});
+el("dailyTargetCard").addEventListener("click", ()=>{
+  const todayKey = todayStr();
+  const entry = getDailyTargetEntry(todayKey);
+  dailyTargetEditMode = entry ? entry.mode : getLastDailyTargetMode();
+  syncDailyTargetModeToggle();
+  el("dailyTargetDateLabel").textContent = new Date().toLocaleDateString("id-ID", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+  el("dailyTargetInput").value = entry ? Number(entry.amount).toLocaleString("id-ID") : "";
+  openModalTracked("dailyTargetEditBackdrop");
+});
+el("dailyTargetInput").addEventListener("input", (e)=>{
+  const digits = e.target.value.replace(/\D/g,"");
+  e.target.value = digits ? Number(digits).toLocaleString("id-ID") : "";
+});
+el("saveDailyTargetBtn").addEventListener("click", async ()=>{
+  const digits = el("dailyTargetInput").value.replace(/\D/g,"");
+  const amount = Number(digits) || 0;
+  if(amount <= 0){ showToast("Nominal target belum diisi"); return; }
+  dailyTargets[todayStr()] = { amount, mode: dailyTargetEditMode };
+  await persistDailyTargets();
+  render();
+  showToast("Target hari ini disimpan");
+  requestCloseModal("dailyTargetEditBackdrop");
+});
+el("clearDailyTargetBtn").addEventListener("click", async ()=>{
+  delete dailyTargets[todayStr()];
+  await persistDailyTargets();
+  render();
+  showToast("Target hari ini dihapus");
+  requestCloseModal("dailyTargetEditBackdrop");
+});
+el("closeDailyTargetEditBtn").addEventListener("click", ()=> requestCloseModal("dailyTargetEditBackdrop"));
+el("dailyTargetEditBackdrop").addEventListener("click", (e)=>{ if(e.target===el("dailyTargetEditBackdrop")) requestCloseModal("dailyTargetEditBackdrop"); });
 
 // tab "Sumber Pemasukan" di Pengaturan
 // markup tombol unggah/reset logo kustom untuk satu baris kategori/dompet di Pengaturan
@@ -5256,9 +5491,19 @@ el("exportCsvBtn").addEventListener("click", ()=>{
 
 // ekspor backup JSON
 el("exportJsonBtn").addEventListener("click", ()=>{
-  const payload = JSON.stringify({ transactions, savingsTarget, customIncomeCategories, customExpenseCategories, categoryOverrides, wallets, savingsPots, savingsTx, walletTransfers, appLogo, categoryLogos, walletLogos, targetLogo, potLogos }, null, 2);
+  const payload = JSON.stringify(buildBackupPayload(), null, 2);
   downloadBlob(payload, "application/json", `saku-backup-${todayStr()}.json`);
   showToast("Backup berhasil diunduh");
+});
+
+// simpan backup otomatis terbaru ke file (1 klik user — syarat browser untuk download)
+el("saveAutoBackupFileBtn").addEventListener("click", async ()=>{
+  let list = [];
+  try{ list = (await idbGet("autoBackups")) || []; }catch(e){ list = []; }
+  if(!Array.isArray(list) || list.length === 0){ showToast("Belum ada backup otomatis"); return; }
+  const item = list[list.length - 1];
+  downloadBlob(JSON.stringify(item.payload, null, 2), "application/json", `saku-auto-backup-${String(item.at||"").slice(0,10)}.json`);
+  showToast("Backup diunduh ke Download");
 });
 
 function downloadBlob(content, mime, filename){
@@ -5278,16 +5523,33 @@ el("importInput").addEventListener("change", (e)=>{
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try{
-      const data = JSON.parse(reader.result);
-      const incoming = Array.isArray(data) ? data : (Array.isArray(data.transactions) ? data.transactions : null);
-      if(!incoming) throw new Error("format tidak dikenali");
+      const raw = JSON.parse(reader.result);
+      // dukung format baru {app, schemaVersion, data} dan format lama (langsung / {transactions})
+      const data = (raw && typeof raw === "object" && raw.data && typeof raw.data === "object") ? raw.data : raw;
+      if(raw && raw.data && raw.app && raw.app !== BACKUP_APP) throw new Error("bukan backup Saku");
+      const incomingRaw = Array.isArray(data) ? data : (Array.isArray(data.transactions) ? data.transactions : null);
+      if(!incomingRaw) throw new Error("format tidak dikenali");
+      const incoming = incomingRaw.map(sanitizeTx).filter(Boolean);
+      const skipped = incomingRaw.length - incoming.length;
+      if(incoming.length === 0 && skipped > 0) throw new Error("semua transaksi tidak valid");
+      // snapshot otomatis sebelum gabung, biar bisa dipulihkan kalau salah file
+      snapshotBeforeImport();
       const existingIds = new Set(transactions.map(t=>t.id));
       const merged = transactions.concat(incoming.filter(t => t && t.id && !existingIds.has(t.id)));
       persistTransactions(merged);
       if(data && !Array.isArray(data) && data.savingsTarget){
         persistTarget(Number(data.savingsTarget) || 0);
+      }
+      if(data && !Array.isArray(data) && data.dailyTargets && typeof data.dailyTargets === "object"){
+        Object.entries(data.dailyTargets).forEach(([k, v])=>{
+          if(!/^\d{4}-\d{2}-\d{2}$/.test(k) || dailyTargets[k]) return;
+          const amount = (v && typeof v === "object") ? Number(v.amount) : Number(v);
+          if(!isFinite(amount) || amount <= 0) return;
+          dailyTargets[k] = { amount: Math.round(amount), mode: (v && v.mode === "bersih") ? "bersih" : "masuk" };
+        });
+        persistDailyTargets();
       }
       if(data && !Array.isArray(data) && Array.isArray(data.customIncomeCategories)){
         const existingCustomIds = new Set(customIncomeCategories.map(c=>c.id));
@@ -5309,9 +5571,9 @@ el("importInput").addEventListener("change", (e)=>{
       }
       if(data && !Array.isArray(data) && Array.isArray(data.wallets)){
         const existingWalletIds = new Set(wallets.map(w=>w.id));
-        wallets = wallets.concat(
-          data.wallets.filter(w => w && w.id && !existingWalletIds.has(w.id))
-        );
+        const cleanWallets = data.wallets.map(sanitizeWallet).filter(Boolean)
+          .filter(w => !existingWalletIds.has(w.id));
+        wallets = wallets.concat(cleanWallets);
         persistWallets();
       }
       if(data && !Array.isArray(data) && Array.isArray(data.savingsPots)){
@@ -5358,10 +5620,11 @@ el("importInput").addEventListener("change", (e)=>{
         persistPotLogos();
       }
       render();
-      showToast("Data cadangan berhasil digabung");
+      showToast(skipped > 0 ? `Data digabung, ${skipped} baris tidak valid dilewati` : "Data cadangan berhasil digabung");
+      renderAutoBackupList();
       requestCloseModal("settingsBackdrop");
     }catch(err){
-      showToast("File cadangan tidak valid");
+      showToast(err && err.message ? `File cadangan tidak valid: ${err.message}` : "File cadangan tidak valid");
     }
     e.target.value = "";
   };
@@ -5385,29 +5648,6 @@ function updateHeaderDateTime(){
 }
 updateHeaderDateTime();
 setInterval(updateHeaderDateTime, 1000);
-
-// ===== sapaan header: "HALO [NAMA]" + "SELAMAT [PAGI/SIANG/SORE/MALAM]" =====
-function greetingPeriod(hour){
-  if(hour >= 4 && hour < 11) return "PAGI";
-  if(hour >= 11 && hour < 15) return "SIANG";
-  if(hour >= 15 && hour < 18) return "SORE";
-  return "MALAM";
-}
-function updateHeaderGreeting(){
-  const nameEl = el("headerGreetName");
-  const timeEl = el("headerGreetTime");
-  if(nameEl){
-    let displayName = (userName || "").trim().replace(/\.+$/g, "").trim();
-    // hilangkan titik-titik sisa dari ellipsis atau input, biar tidak jadi "HALO ANE....."
-    if(displayName.length > 20) displayName = displayName.slice(0,20).trim();
-    nameEl.textContent = displayName ? `HALO ${displayName.toUpperCase()}` : "HALO";
-  }
-  if(timeEl){
-    timeEl.textContent = `SELAMAT ${greetingPeriod(new Date().getHours())}`;
-  }
-}
-updateHeaderGreeting();
-setInterval(updateHeaderGreeting, 60 * 1000);
 
 // ===== Perbandingan A+B: Card di Beranda + Sheet Detail =====
 let compareSelA = "month_0";
