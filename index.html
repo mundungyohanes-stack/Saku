@@ -204,6 +204,7 @@
   .wallet-meta{display:flex; flex-wrap:wrap; gap:3px 14px; font-family:var(--mono); font-size:10.5px; font-weight:600; padding-left:25px; margin-top:3px; font-variant-numeric:tabular-nums;}
   .wallet-meta-item.green{color:var(--green);}
   .wallet-meta-item.red{color:var(--red);}
+  .wallet-meta-item.transfer{color:#55708F;}
 
   /* tabungan (pos/target tabungan terkunci) */
   .savings-add-btn{width:26px; height:26px; border-radius:50%; background:var(--navy); color:var(--gold-2); border:none;
@@ -3363,29 +3364,31 @@ function renderWalletCard(){
 function getTodayWalletBalances(){
   const todayKey = todayStr();
   const map = {};
-  wallets.forEach(w=>{ map[w.id] = { income:0, expense:0, balance:0 }; });
+  wallets.forEach(w=>{ map[w.id] = { income:0, expense:0, transferIn:0, transferOut:0, balance:0 }; });
   transactions.filter(t=>t.date===todayKey).forEach(t=>{
     const wid = (t.wallet && map.hasOwnProperty(t.wallet)) ? t.wallet : "tunai";
-    if(!map.hasOwnProperty(wid)) map[wid] = { income:0, expense:0, balance:0 };
+    if(!map.hasOwnProperty(wid)) map[wid] = { income:0, expense:0, transferIn:0, transferOut:0, balance:0 };
     if(t.type==="masuk"){ map[wid].income += t.amount; map[wid].balance += t.amount; }
     else{ map[wid].expense += t.amount; map[wid].balance -= t.amount; }
   });
   savingsTx.filter(t=>t.date===todayKey).forEach(t=>{
     const wid = (t.wallet && map.hasOwnProperty(t.wallet)) ? t.wallet : "tunai";
-    if(!map.hasOwnProperty(wid)) map[wid] = { income:0, expense:0, balance:0 };
+    if(!map.hasOwnProperty(wid)) map[wid] = { income:0, expense:0, transferIn:0, transferOut:0, balance:0 };
     map[wid].balance += t.type==="setor" ? -t.amount : t.amount;
   });
   walletTransfers.filter(t=>t.date===todayKey).forEach(t=>{
     const fromId = (t.fromWallet && map.hasOwnProperty(t.fromWallet)) ? t.fromWallet : "tunai";
     const toId = (t.toWallet && map.hasOwnProperty(t.toWallet)) ? t.toWallet : "tunai";
-    if(!map.hasOwnProperty(fromId)) map[fromId] = { income:0, expense:0, balance:0 };
-    if(!map.hasOwnProperty(toId)) map[toId] = { income:0, expense:0, balance:0 };
+    if(!map.hasOwnProperty(fromId)) map[fromId] = { income:0, expense:0, transferIn:0, transferOut:0, balance:0 };
+    if(!map.hasOwnProperty(toId)) map[toId] = { income:0, expense:0, transferIn:0, transferOut:0, balance:0 };
+    map[fromId].transferOut += t.amount;
     map[fromId].balance -= t.amount;
+    map[toId].transferIn += t.amount;
     map[toId].balance += t.amount;
   });
   return wallets.map(w => {
-    const m = map[w.id] || { income:0, expense:0, balance:0 };
-    return { wallet:w, income:m.income, expense:m.expense, balance:m.balance };
+    const m = map[w.id] || { income:0, expense:0, transferIn:0, transferOut:0, balance:0 };
+    return { wallet:w, income:m.income, expense:m.expense, transferIn:m.transferIn, transferOut:m.transferOut, balance:m.balance };
   });
 }
 
@@ -3396,7 +3399,7 @@ function renderTodayWalletCard(){
     body.innerHTML = `<div class="empty-mini">Belum ada dompet. Tambah lewat Pengaturan &gt; Dompet.</div>`;
     return;
   }
-  const balances = getTodayWalletBalances().filter(x => x.balance !== 0 || x.income > 0 || x.expense > 0);
+  const balances = getTodayWalletBalances().filter(x => x.balance !== 0 || x.income > 0 || x.expense > 0 || x.transferIn > 0 || x.transferOut > 0);
   if(balances.length === 0){
     body.innerHTML = `<div class="empty-mini">Belum ada transaksi hari ini.</div>`;
     return;
@@ -3408,13 +3411,15 @@ function renderTodayWalletCard(){
     const netText = x.balance===0 ? "Rp0" : (x.balance<0?'-':'+')+formatRupiah(x.balance);
     const inc = x.income>0 ? `<span class="wallet-meta-item green">Masuk +${formatRupiah(x.income)}</span>` : "";
     const exp = x.expense>0 ? `<span class="wallet-meta-item red">Keluar -${formatRupiah(x.expense)}</span>` : "";
+    const trOut = x.transferOut>0 ? `<span class="wallet-meta-item transfer">Pindah -${formatRupiah(x.transferOut)}</span>` : "";
+    const trIn = x.transferIn>0 ? `<span class="wallet-meta-item transfer">Pindah +${formatRupiah(x.transferIn)}</span>` : "";
     return `
     <div class="wallet-row-wrap">
       <div class="wallet-row">
         <div class="wallet-row-label"><span>${walletIconHTML(x.wallet)}</span><span>${x.wallet.label}</span></div>
         <div class="wallet-row-amount" style="color:${netColor};">${netText}</div>
       </div>
-      ${(inc||exp) ? `<div class="wallet-meta">${inc}${exp}</div>` : ""}
+      ${(inc||exp||trOut||trIn) ? `<div class="wallet-meta">${inc}${exp}${trOut}${trIn}</div>` : ""}
     </div>`;
   }).join("") + (hiddenCount > 0
       ? `<div class="show-zero-toggle" id="todayWalletExpandBtn">+ ${hiddenCount} dompet lainnya • tampilkan</div>`
