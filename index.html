@@ -198,6 +198,12 @@
   .wallet-row{display:flex; align-items:center; justify-content:space-between; padding:6px 0; font-size:12.5px;}
   .wallet-row-label{display:flex; align-items:center; gap:7px; color:var(--ink-soft);}
   .wallet-row-amount{font-family:var(--mono); font-weight:600; color:var(--ink-soft); font-variant-numeric:tabular-nums;}
+  .wallet-row-wrap{padding:6px 0 7px; border-bottom:1px solid var(--line-2);}
+  .wallet-row-wrap:last-child{border-bottom:none;}
+  .wallet-row-wrap .wallet-row{padding:0;}
+  .wallet-meta{display:flex; flex-wrap:wrap; gap:3px 14px; font-family:var(--mono); font-size:10.5px; font-weight:600; padding-left:25px; margin-top:3px; font-variant-numeric:tabular-nums;}
+  .wallet-meta-item.green{color:var(--green);}
+  .wallet-meta-item.red{color:var(--red);}
 
   /* tabungan (pos/target tabungan terkunci) */
   .savings-add-btn{width:26px; height:26px; border-radius:50%; background:var(--navy); color:var(--gold-2); border:none;
@@ -3357,26 +3363,30 @@ function renderWalletCard(){
 function getTodayWalletBalances(){
   const todayKey = todayStr();
   const map = {};
-  wallets.forEach(w=>{ map[w.id] = 0; });
+  wallets.forEach(w=>{ map[w.id] = { income:0, expense:0, balance:0 }; });
   transactions.filter(t=>t.date===todayKey).forEach(t=>{
     const wid = (t.wallet && map.hasOwnProperty(t.wallet)) ? t.wallet : "tunai";
-    if(!map.hasOwnProperty(wid)) map[wid] = 0;
-    map[wid] += t.type==="masuk" ? t.amount : -t.amount;
+    if(!map.hasOwnProperty(wid)) map[wid] = { income:0, expense:0, balance:0 };
+    if(t.type==="masuk"){ map[wid].income += t.amount; map[wid].balance += t.amount; }
+    else{ map[wid].expense += t.amount; map[wid].balance -= t.amount; }
   });
   savingsTx.filter(t=>t.date===todayKey).forEach(t=>{
     const wid = (t.wallet && map.hasOwnProperty(t.wallet)) ? t.wallet : "tunai";
-    if(!map.hasOwnProperty(wid)) map[wid] = 0;
-    map[wid] += t.type==="setor" ? -t.amount : t.amount;
+    if(!map.hasOwnProperty(wid)) map[wid] = { income:0, expense:0, balance:0 };
+    map[wid].balance += t.type==="setor" ? -t.amount : t.amount;
   });
   walletTransfers.filter(t=>t.date===todayKey).forEach(t=>{
     const fromId = (t.fromWallet && map.hasOwnProperty(t.fromWallet)) ? t.fromWallet : "tunai";
     const toId = (t.toWallet && map.hasOwnProperty(t.toWallet)) ? t.toWallet : "tunai";
-    if(!map.hasOwnProperty(fromId)) map[fromId] = 0;
-    if(!map.hasOwnProperty(toId)) map[toId] = 0;
-    map[fromId] -= t.amount;
-    map[toId] += t.amount;
+    if(!map.hasOwnProperty(fromId)) map[fromId] = { income:0, expense:0, balance:0 };
+    if(!map.hasOwnProperty(toId)) map[toId] = { income:0, expense:0, balance:0 };
+    map[fromId].balance -= t.amount;
+    map[toId].balance += t.amount;
   });
-  return wallets.map(w => ({ wallet: w, balance: map[w.id] || 0 }));
+  return wallets.map(w => {
+    const m = map[w.id] || { income:0, expense:0, balance:0 };
+    return { wallet:w, income:m.income, expense:m.expense, balance:m.balance };
+  });
 }
 
 function renderTodayWalletCard(){
@@ -3386,18 +3396,27 @@ function renderTodayWalletCard(){
     body.innerHTML = `<div class="empty-mini">Belum ada dompet. Tambah lewat Pengaturan &gt; Dompet.</div>`;
     return;
   }
-  const balances = getTodayWalletBalances().filter(x => x.balance !== 0);
+  const balances = getTodayWalletBalances().filter(x => x.balance !== 0 || x.income > 0 || x.expense > 0);
   if(balances.length === 0){
     body.innerHTML = `<div class="empty-mini">Belum ada transaksi hari ini.</div>`;
     return;
   }
   const visible = todayWalletExpanded ? balances : balances.slice(0, TODAY_WALLET_MAX_ROWS);
   const hiddenCount = balances.length - visible.length;
-  body.innerHTML = visible.map(x => `
-    <div class="wallet-row">
-      <div class="wallet-row-label"><span>${walletIconHTML(x.wallet)}</span><span>${x.wallet.label}</span></div>
-      <div class="wallet-row-amount" style="color:${x.balance<0 ? 'var(--red)' : 'var(--green)'};">${x.balance<0?'-':'+'}${formatRupiah(x.balance)}</div>
-    </div>`).join("") + (hiddenCount > 0
+  body.innerHTML = visible.map(x => {
+    const netColor = x.balance<0 ? "var(--red)" : x.balance>0 ? "var(--green)" : "var(--muted)";
+    const netText = x.balance===0 ? "Rp0" : (x.balance<0?'-':'+')+formatRupiah(x.balance);
+    const inc = x.income>0 ? `<span class="wallet-meta-item green">Masuk +${formatRupiah(x.income)}</span>` : "";
+    const exp = x.expense>0 ? `<span class="wallet-meta-item red">Keluar -${formatRupiah(x.expense)}</span>` : "";
+    return `
+    <div class="wallet-row-wrap">
+      <div class="wallet-row">
+        <div class="wallet-row-label"><span>${walletIconHTML(x.wallet)}</span><span>${x.wallet.label}</span></div>
+        <div class="wallet-row-amount" style="color:${netColor};">${netText}</div>
+      </div>
+      ${(inc||exp) ? `<div class="wallet-meta">${inc}${exp}</div>` : ""}
+    </div>`;
+  }).join("") + (hiddenCount > 0
       ? `<div class="show-zero-toggle" id="todayWalletExpandBtn">+ ${hiddenCount} dompet lainnya • tampilkan</div>`
       : (todayWalletExpanded && balances.length > TODAY_WALLET_MAX_ROWS
         ? `<div class="show-zero-toggle" id="todayWalletExpandBtn">sembunyikan</div>` : ""));
