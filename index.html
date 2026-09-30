@@ -3183,9 +3183,7 @@ function renderTargetTopLogo(){
 
 function renderTarget(monthTx){
   renderTargetTopLogo();
-  const monthIncome = monthTx.filter(t=>t.type==="masuk").reduce((s,t)=>s+t.amount,0);
-  const monthExpense = monthTx.filter(t=>t.type==="keluar").reduce((s,t)=>s+t.amount,0);
-  const net = monthIncome - monthExpense;
+  const net = transactions.reduce((s,t)=> s + (t.type==="masuk" ? t.amount : -t.amount), 0);
   const body = el("targetBody");
   if(!savingsTarget || savingsTarget<=0){
     body.innerHTML = `<div class="target-empty">Ketuk untuk mengatur target tabungan bulan ini.</div>`;
@@ -3193,11 +3191,12 @@ function renderTarget(monthTx){
   }
   const pct = Math.max(0, Math.min(100, (net/savingsTarget)*100));
   const over = net >= savingsTarget;
+  const remainRp = Math.max(savingsTarget - Math.max(net,0), 0);
   body.innerHTML = `
     <div class="target-track"><div class="target-fill${over?" over":""}" style="width:${pct}%;"></div></div>
     <div class="target-bottom">
       <span>${formatRupiah(Math.max(net,0))} / ${formatRupiah(savingsTarget)}</span>
-      <span>${over ? "Target tercapai 🎉" : Math.round(pct) + "%"}</span>
+      <span>${over ? "Target tercapai 🎉" : Math.round(pct) + "% / " + formatRupiah(remainRp)}</span>
     </div>`;
 }
 
