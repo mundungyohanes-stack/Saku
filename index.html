@@ -1417,6 +1417,10 @@
           <div class="settings-hint">Setiap dibuka (maksimal 1x seminggu) aplikasi menyimpan salinan otomatis di perangkat ini. Simpan juga ke file Download seminggu sekali biar aman kalau ganti HP.</div>
           <div id="autoBackupList"></div>
           <button class="settings-row-btn" id="saveAutoBackupFileBtn">💾 Simpan Backup Terbaru ke File</button>
+
+          <div class="field-label" style="margin-top:14px; color:var(--red);">Zona Berbahaya</div>
+          <button class="settings-row-btn" id="wipeAllDataBtn" style="color:var(--red); border-color:rgba(161,61,61,.4);">🗑 Hapus Semua Data Saku</button>
+          <div class="settings-hint">Menghapus seluruh transaksi, target, tabungan, dompet, dan pengaturan di perangkat ini. Hanya data Saku saja, aplikasi lain tidak ikut terhapus.</div>
         </div>
 
         <div id="settingsTabIncome" style="display:none;">
@@ -5527,6 +5531,28 @@ el("saveAutoBackupFileBtn").addEventListener("click", async ()=>{
   const item = list[list.length - 1];
   downloadBlob(JSON.stringify(item.payload, null, 2), "application/json", `saku-auto-backup-${String(item.at||"").slice(0,10)}.json`);
   showToast("Backup diunduh ke Download");
+});
+
+// hapus semua data Saku di perangkat ini (konfirmasi ganda)
+async function idbClearStore(){
+  const db = await openDB();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const req = tx.objectStore(STORE_NAME).clear();
+    req.onsuccess = ()=> resolve(true);
+    req.onerror = ()=> reject(req.error);
+  });
+}
+el("wipeAllDataBtn").addEventListener("click", ()=>{
+  confirmDelete("Hapus SEMUA data Saku di perangkat ini? Transaksi, target, tabungan, dompet, dan pengaturan akan hilang.", ()=>{
+    confirmDelete("Yakin 100%? Ini permanen dan tidak bisa dibatalkan. Unduh Backup JSON dulu kalau masih butuh data ini.", async ()=>{
+      try{
+        await idbClearStore();
+        try{ localStorage.clear(); }catch(e){ /* abaikan */ }
+      }catch(e){ /* lanjut reload walau gagal */ }
+      location.reload();
+    });
+  });
 });
 
 function downloadBlob(content, mime, filename){
